@@ -7,7 +7,7 @@
     In any case of disagreement, a dispute can be opened. Only the arbiter, that is set while creating an offer, can
         resolve a dispute.
 */
-module overmind::peer_trading {
+module overmind::broker_it_yourself {
     use aptos_std::simple_map::SimpleMap;
     use std::option::Option;
     use aptos_framework::account::SignerCapability;
@@ -19,7 +19,7 @@ module overmind::peer_trading {
     use std::option;
     use std::vector;
     use aptos_framework::event::EventHandle;
-    use overmind::peer_trading_events::{
+    use overmind::broker_it_yourself_events::{
         Self,
         CreateOfferEvent,
         AcceptOfferEvent,
@@ -32,7 +32,7 @@ module overmind::peer_trading {
     use aptos_framework::event;
     use aptos_framework::timestamp;
 
-    friend overmind::peer_trading_tests;
+    friend overmind::broker_it_yourself_tests;
 
     ////////////
     // ERRORS //
@@ -52,7 +52,7 @@ module overmind::peer_trading {
     const ERROR_SIGNER_NOT_ARBITER: u64 = 11;
 
     // PDA seed
-    const SEED: vector<u8> = b"PEER_TRADING";
+    const SEED: vector<u8> = b"broker_it_yourself";
 
     /*
         Resource struct holding data about available offers

@@ -1,8 +1,8 @@
-module overmind::peer_trading_tests {
+module overmind::broker_it_yourself_tests {
     #[test_only]
     use aptos_framework::account;
     #[test_only]
-    use overmind::peer_trading::Self;
+    use overmind::broker_it_yourself::Self;
     #[test_only]
     use aptos_std::simple_map;
     #[test_only]
@@ -22,9 +22,9 @@ module overmind::peer_trading_tests {
     #[test]
     fun test_init() {
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        assert!(peer_trading::state_exists(), 0);
+        assert!(broker_it_yourself::state_exists(), 0);
 
         let (
             offers,
@@ -37,7 +37,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 0, 1);
         assert!(simple_map::length(&creators_offers) == 0 , 2);
         assert!(offer_id == 0, 3);
@@ -50,17 +50,17 @@ module overmind::peer_trading_tests {
         assert!(resolve_dispute_events_counter == 0, 10);
         assert!(
             coin::is_account_registered<AptosCoin>(
-                account::create_resource_address(&@admin, b"PEER_TRADING")
+                account::create_resource_address(&@admin, b"broker_it_yourself")
             ),
             12
         );
     }
 
     #[test]
-    #[expected_failure(abort_code = 0, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 0, location = overmind::broker_it_yourself)]
     fun test_init_singer_not_admin() {
         let account = account::create_account_for_test(@0xCED);
-        peer_trading::init(&account);
+        broker_it_yourself::init(&account);
     }
 
     #[test]
@@ -71,9 +71,9 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
@@ -81,7 +81,7 @@ module overmind::peer_trading_tests {
         let sell_apt = true;
         coin::register<AptosCoin>(&creator);
         aptos_coin::mint(&aptos_framework, @0xACE, apt_amount);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let (
             offers,
@@ -94,7 +94,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -118,7 +118,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -127,7 +127,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 18);
         assert!(sell_apt, 19);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 20);
         assert!(!counterparty_flag, 21);
 
@@ -150,9 +150,9 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
@@ -160,7 +160,7 @@ module overmind::peer_trading_tests {
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
         aptos_coin::mint(&aptos_framework, @0xACE, apt_amount);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let (
             offers,
@@ -173,7 +173,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -197,7 +197,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -206,7 +206,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 18);
         assert!(!sell_apt, 19);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 20);
         assert!(!counterparty_flag, 21);
 
@@ -223,18 +223,18 @@ module overmind::peer_trading_tests {
 
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_create_offer_state_not_initialized() {
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = true;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
     }
 
     #[test]
-    #[expected_failure(abort_code = 2, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 2, location = overmind::broker_it_yourself)]
     fun test_create_offer_insufficient_funds() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -242,7 +242,7 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
@@ -251,7 +251,7 @@ module overmind::peer_trading_tests {
         let sell_apt = true;
         coin::register<AptosCoin>(&creator);
         aptos_coin::mint(&aptos_framework, @0xACE, 4842254);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
@@ -265,9 +265,9 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
@@ -275,11 +275,11 @@ module overmind::peer_trading_tests {
         let sell_apt = true;
         coin::register<AptosCoin>(&creator);
         aptos_coin::mint(&aptos_framework, @0xACE, apt_amount);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
         let (
             offers,
@@ -292,7 +292,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -316,7 +316,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -326,7 +326,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 19);
         assert!(sell_apt, 20);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 21);
         assert!(!counterparty_flag, 22);
 
@@ -350,9 +350,9 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
@@ -360,12 +360,12 @@ module overmind::peer_trading_tests {
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
         aptos_coin::mint(&aptos_framework, @0xACE, apt_amount);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
         let (
             offers,
@@ -378,7 +378,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -402,7 +402,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -412,7 +412,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 19);
         assert!(!sell_apt, 20);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 21);
         assert!(!counterparty_flag, 22);
 
@@ -429,24 +429,24 @@ module overmind::peer_trading_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_accept_offer_state_not_initialized() {
         let counterparty_signer = account::create_account_for_test(@0xDAD);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 3, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 3, location = overmind::broker_it_yourself)]
     fun test_accept_offer_does_not_exist() {
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 4, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 4, location = overmind::broker_it_yourself)]
     fun test_accept_offer_already_accepted() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -454,27 +454,27 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
     }
 
     #[test]
-    #[expected_failure(abort_code = 9, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 9, location = overmind::broker_it_yourself)]
     fun test_accept_offer_dispute_opened() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -482,27 +482,27 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::open_dispute_unchecked(0);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::open_dispute_unchecked(0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
     }
 
     #[test]
-    #[expected_failure(abort_code = 2, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 2, location = overmind::broker_it_yourself)]
     fun test_accept_offer_insufficient_funds() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -510,19 +510,19 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, 125641);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
@@ -536,23 +536,23 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
-        peer_trading::complete_transaction(&creator, 0);
+        broker_it_yourself::complete_transaction(&creator, 0);
 
         let (
             offers,
@@ -565,7 +565,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -589,7 +589,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -599,7 +599,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 19);
         assert!(!sell_apt, 20);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(creator_flag, 21);
         assert!(!counterparty_flag, 22);
 
@@ -623,23 +623,23 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
-        peer_trading::complete_transaction(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&counterparty_signer, 0);
 
         let (
             offers,
@@ -652,7 +652,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -676,7 +676,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -686,7 +686,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 19);
         assert!(!sell_apt, 20);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 21);
         assert!(counterparty_flag, 22);
 
@@ -710,24 +710,24 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
-        peer_trading::complete_transaction(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&creator, 0);
+        broker_it_yourself::complete_transaction(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&creator, 0);
 
         let (
             offers,
@@ -740,7 +740,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 0, 0);
         assert!(simple_map::length(&creators_offers) == 1, 1);
         assert!(simple_map::contains_key(&creators_offers, &@0xACE), 2);
@@ -765,42 +765,42 @@ module overmind::peer_trading_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_complete_transaction_state_not_initialized() {
         let counterparty_signer = account::create_account_for_test(@0xDAD);
-        peer_trading::complete_transaction(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&counterparty_signer, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 3, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 3, location = overmind::broker_it_yourself)]
     fun test_complete_transaction_offer_does_not_exist() {
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
-        peer_trading::complete_transaction(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&counterparty_signer, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 5, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 5, location = overmind::broker_it_yourself)]
     fun test_complete_transaction_offer_not_accepted() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
-        peer_trading::complete_transaction(&creator, 0);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::complete_transaction(&creator, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 6, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 6, location = overmind::broker_it_yourself)]
     fun test_complete_transaction_user_does_not_participate_in_transaction() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -808,29 +808,29 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty = account::create_account_for_test(@0xABCDEF);
         coin::register<AptosCoin>(&counterparty);
         aptos_coin::mint(&aptos_framework, @0xABCDEF, apt_amount);
-        peer_trading::accept_offer(&counterparty, 0);
+        broker_it_yourself::accept_offer(&counterparty, 0);
 
         let account = account::create_account_for_test(@0xDAD);
-        peer_trading::complete_transaction(&account, 0);
+        broker_it_yourself::complete_transaction(&account, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
     }
 
     #[test]
-    #[expected_failure(abort_code = 7, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 7, location = overmind::broker_it_yourself)]
     fun test_complete_transaction_user_already_marked_as_completed() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -838,28 +838,28 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&counterparty_signer, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
     }
 
     #[test]
-    #[expected_failure(abort_code = 9, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 9, location = overmind::broker_it_yourself)]
     fun test_complete_transaction_dispute_opened() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -867,21 +867,21 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::open_dispute_unchecked(0);
-        peer_trading::complete_transaction(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::open_dispute_unchecked(0);
+        broker_it_yourself::complete_transaction(&counterparty_signer, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
@@ -895,9 +895,9 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
@@ -905,8 +905,8 @@ module overmind::peer_trading_tests {
         let sell_apt = true;
         coin::register<AptosCoin>(&creator);
         aptos_coin::mint(&aptos_framework, @0xACE, apt_amount);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
-        peer_trading::cancel_offer(&creator, 0);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::cancel_offer(&creator, 0);
 
         let (
             offers,
@@ -919,7 +919,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 0, 0);
         assert!(simple_map::length(&creators_offers) == 1, 1);
         assert!(simple_map::contains_key(&creators_offers, &@0xACE), 2);
@@ -950,17 +950,17 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
-        peer_trading::cancel_offer(&creator, 0);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::cancel_offer(&creator, 0);
 
         let (
             offers,
@@ -973,7 +973,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 0, 0);
         assert!(simple_map::length(&creators_offers) == 1, 1);
         assert!(simple_map::contains_key(&creators_offers, &@0xACE), 2);
@@ -997,44 +997,44 @@ module overmind::peer_trading_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_cancel_offer_state_not_initialized() {
         let creator = account::create_account_for_test(@0xDAD);
-        peer_trading::cancel_offer(&creator, 0);
+        broker_it_yourself::cancel_offer(&creator, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 3, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 3, location = overmind::broker_it_yourself)]
     fun test_cancel_offer_does_not_exist() {
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xDAD);
-        peer_trading::cancel_offer(&creator, 0);
+        broker_it_yourself::cancel_offer(&creator, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 8, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 8, location = overmind::broker_it_yourself)]
     fun test_cancel_offer_signer_is_not_creator() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let account = account::create_account_for_test(@0xDAD);
-        peer_trading::cancel_offer(&account, 0);
+        broker_it_yourself::cancel_offer(&account, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 4, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 4, location = overmind::broker_it_yourself)]
     fun test_cancel_offer_already_accepted() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -1042,28 +1042,28 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
-        peer_trading::cancel_offer(&creator, 0);
+        broker_it_yourself::cancel_offer(&creator, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
     }
 
     #[test]
-    #[expected_failure(abort_code = 9, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 9, location = overmind::broker_it_yourself)]
     fun test_cancel_offer_dispute_opened() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -1071,16 +1071,16 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
-        peer_trading::open_dispute_unchecked(0);
-        peer_trading::cancel_offer(&creator, 0);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::open_dispute_unchecked(0);
+        broker_it_yourself::cancel_offer(&creator, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
@@ -1094,23 +1094,23 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&creator, 0);
-        peer_trading::open_dispute(&creator, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&creator, 0);
+        broker_it_yourself::open_dispute(&creator, 0);
 
         let (
             offers,
@@ -1123,7 +1123,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -1147,7 +1147,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -1157,7 +1157,7 @@ module overmind::peer_trading_tests {
         assert!(dispute_opened, 19);
         assert!(!sell_apt, 20);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(creator_flag, 21);
         assert!(!counterparty_flag, 22);
 
@@ -1181,23 +1181,23 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&creator, 0);
-        peer_trading::open_dispute(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&creator, 0);
+        broker_it_yourself::open_dispute(&counterparty_signer, 0);
 
         let (
             offers,
@@ -1210,7 +1210,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -1234,7 +1234,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -1244,7 +1244,7 @@ module overmind::peer_trading_tests {
         assert!(dispute_opened, 19);
         assert!(!sell_apt, 20);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(creator_flag, 21);
         assert!(!counterparty_flag, 22);
 
@@ -1261,24 +1261,24 @@ module overmind::peer_trading_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_open_dispute_state_not_initialized() {
         let creator = account::create_account_for_test(@0xDAD);
-        peer_trading::open_dispute(&creator, 0);
+        broker_it_yourself::open_dispute(&creator, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 3, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 3, location = overmind::broker_it_yourself)]
     fun test_open_dispute_offer_does_not_exist() {
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xDAD);
-        peer_trading::open_dispute(&creator, 0);
+        broker_it_yourself::open_dispute(&creator, 0);
     }
 
     #[test]
-    #[expected_failure(abort_code = 6, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 6, location = overmind::broker_it_yourself)]
     fun test_open_dispute_user_does_not_participate_in_transaction() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -1286,29 +1286,29 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
 
         let account = account::create_account_for_test(@0x2468353221AA);
-        peer_trading::open_dispute(&account, 0);
+        broker_it_yourself::open_dispute(&account, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
     }
 
     #[test]
-    #[expected_failure(abort_code = 9, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 9, location = overmind::broker_it_yourself)]
     fun test_open_dispute_opened() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
@@ -1316,21 +1316,21 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::open_dispute(&counterparty_signer, 0);
-        peer_trading::open_dispute(&creator, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::open_dispute(&counterparty_signer, 0);
+        broker_it_yourself::open_dispute(&creator, 0);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
@@ -1344,26 +1344,26 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&creator, 0);
-        peer_trading::open_dispute(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&creator, 0);
+        broker_it_yourself::open_dispute(&counterparty_signer, 0);
 
         let arbiter_signer = account::create_account_for_test(arbiter);
-        peer_trading::resolve_dispute(&arbiter_signer, 0, false, false);
+        broker_it_yourself::resolve_dispute(&arbiter_signer, 0, false, false);
 
         let (
             offers,
@@ -1376,7 +1376,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
         assert!(simple_map::length(&creators_offers) == 1, 2);
@@ -1400,7 +1400,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 13);
         assert!(arbiter == @0x13371337, 14);
         assert!(offer_apt_amount == apt_amount, 15);
@@ -1410,7 +1410,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 19);
         assert!(!sell_apt, 20);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 21);
         assert!(!counterparty_flag, 22);
 
@@ -1434,26 +1434,26 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&creator, 0);
-        peer_trading::open_dispute(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&creator, 0);
+        broker_it_yourself::open_dispute(&counterparty_signer, 0);
 
         let arbiter_signer = account::create_account_for_test(arbiter);
-        peer_trading::resolve_dispute(&arbiter_signer, 0, true, true);
+        broker_it_yourself::resolve_dispute(&arbiter_signer, 0, true, true);
 
         let (
             offers,
@@ -1466,7 +1466,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 0, 0);
         assert!(simple_map::length(&creators_offers) == 1, 1);
         assert!(offer_id == 1, 4);
@@ -1497,26 +1497,26 @@ module overmind::peer_trading_tests {
             aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
-        let resource_account_address = account::create_resource_address(&@admin, b"PEER_TRADING");
+        let resource_account_address = account::create_resource_address(&@admin, b"broker_it_yourself");
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
         coin::register<AptosCoin>(&creator);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::complete_transaction(&creator, 0);
-        peer_trading::open_dispute(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::complete_transaction(&creator, 0);
+        broker_it_yourself::open_dispute(&counterparty_signer, 0);
 
         let arbiter_signer = account::create_account_for_test(arbiter);
-        peer_trading::resolve_dispute(&arbiter_signer, 0, true, false);
+        broker_it_yourself::resolve_dispute(&arbiter_signer, 0, true, false);
 
         let (
             offers,
@@ -1529,7 +1529,7 @@ module overmind::peer_trading_tests {
             cancel_offer_events_counter,
             open_dispute_events_counter,
             resolve_dispute_events_counter
-        ) = peer_trading::get_state_unpacked();
+        ) = broker_it_yourself::get_state_unpacked();
         assert!(simple_map::length(&offers) == 0, 0);
         assert!(simple_map::length(&creators_offers) == 1, 1);
         assert!(offer_id == 1, 4);
@@ -1553,67 +1553,67 @@ module overmind::peer_trading_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_resolve_dispute_state_not_initialized() {
         let arbiter = account::create_account_for_test(@0x13371337);
-        peer_trading::resolve_dispute(&arbiter, 0, false, false);
+        broker_it_yourself::resolve_dispute(&arbiter, 0, false, false);
     }
 
     #[test]
-    #[expected_failure(abort_code = 3, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 3, location = overmind::broker_it_yourself)]
     fun test_resolve_dispute_offer_does_not_exist() {
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let arbiter = account::create_account_for_test(@0x13371337);
-        peer_trading::resolve_dispute(&arbiter, 0, false, false);
+        broker_it_yourself::resolve_dispute(&arbiter, 0, false, false);
     }
 
     #[test]
-    #[expected_failure(abort_code = 10, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 10, location = overmind::broker_it_yourself)]
     fun test_resolve_dispute_not_opened() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let arbiter = account::create_account_for_test(arbiter);
-        peer_trading::resolve_dispute(&arbiter, 0, false, false);
+        broker_it_yourself::resolve_dispute(&arbiter, 0, false, false);
     }
 
     #[test]
-    #[expected_failure(abort_code = 11, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 11, location = overmind::broker_it_yourself)]
     fun test_resolve_dispute_signer_not_arbiter() {
         let aptos_framework = account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(&aptos_framework);
         let (burn_cap, mint_cap) = aptos_coin::initialize_for_test(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let counterparty_signer = account::create_account_for_test(@0xDAD);
         coin::register<AptosCoin>(&counterparty_signer);
         aptos_coin::mint(&aptos_framework, @0xDAD, apt_amount);
-        peer_trading::accept_offer(&counterparty_signer, 0);
-        peer_trading::open_dispute(&counterparty_signer, 0);
+        broker_it_yourself::accept_offer(&counterparty_signer, 0);
+        broker_it_yourself::open_dispute(&counterparty_signer, 0);
 
         let account = account::create_account_for_test(@0x48942aaa);
-        peer_trading::resolve_dispute(&account, 0, false, false);
+        broker_it_yourself::resolve_dispute(&account, 0, false, false);
 
         coin::destroy_burn_cap(burn_cap);
         coin::destroy_mint_cap(mint_cap);
@@ -1625,16 +1625,16 @@ module overmind::peer_trading_tests {
         timestamp::set_time_has_started_for_testing(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
-        let offers = peer_trading::get_available_offers();
+        let offers = broker_it_yourself::get_available_offers();
         assert!(simple_map::length(&offers) == 1, 0);
         assert!(simple_map::contains_key(&offers, &0), 1);
 
@@ -1648,7 +1648,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             offer_sell_apt
-        ) = peer_trading::get_offer_unpacked(offer);
+        ) = broker_it_yourself::get_offer_unpacked(offer);
         assert!(creator_address == @0xACE, 2);
         assert!(offer_arbiter == arbiter, 3);
         assert!(offer_apt_amount == apt_amount, 4);
@@ -1657,15 +1657,15 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 7);
         assert!(!offer_sell_apt, 8);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 9);
         assert!(!counterparty_flag, 10);
     }
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_get_available_offers_state_not_initialized() {
-        peer_trading::get_available_offers();
+        broker_it_yourself::get_available_offers();
     }
 
     #[test]
@@ -1674,24 +1674,24 @@ module overmind::peer_trading_tests {
         timestamp::set_time_has_started_for_testing(&aptos_framework);
 
         let admin = account::create_account_for_test(@admin);
-        peer_trading::init(&admin);
+        broker_it_yourself::init(&admin);
 
         let creator = account::create_account_for_test(@0xACE);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
         let second_creator = account::create_account_for_test(@0xACED);
         let arbiter = @0x13371337;
         let apt_amount = 1234456111;
         let usd_amount = 265;
         let sell_apt = false;
-        peer_trading::create_offer(&second_creator, arbiter, apt_amount, usd_amount, sell_apt);
-        peer_trading::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&second_creator, arbiter, apt_amount, usd_amount, sell_apt);
+        broker_it_yourself::create_offer(&creator, arbiter, apt_amount, usd_amount, sell_apt);
 
-        let creator_offers = peer_trading::get_creator_offers(@0xACE);
+        let creator_offers = broker_it_yourself::get_creator_offers(@0xACE);
         assert!(simple_map::length(&creator_offers) == 2, 0);
 
         let first_offer = *simple_map::borrow(&creator_offers, &0);
@@ -1704,7 +1704,7 @@ module overmind::peer_trading_tests {
             completion,
             dispute_opened,
             offer_sell_apt
-        ) = peer_trading::get_offer_unpacked(first_offer);
+        ) = broker_it_yourself::get_offer_unpacked(first_offer);
         assert!(creator_address == @0xACE, 1);
         assert!(offer_arbiter == arbiter, 2);
         assert!(offer_apt_amount == apt_amount, 3);
@@ -1713,7 +1713,7 @@ module overmind::peer_trading_tests {
         assert!(!dispute_opened, 6);
         assert!(!offer_sell_apt, 7);
 
-        let (creator_flag, counterparty_flag) = peer_trading::get_offer_completion_unpacked(completion);
+        let (creator_flag, counterparty_flag) = broker_it_yourself::get_offer_completion_unpacked(completion);
         assert!(!creator_flag, 8);
         assert!(!counterparty_flag, 9);
 
@@ -1722,16 +1722,16 @@ module overmind::peer_trading_tests {
     }
 
     #[test]
-    #[expected_failure(abort_code = 1, location = overmind::peer_trading)]
+    #[expected_failure(abort_code = 1, location = overmind::broker_it_yourself)]
     fun test_get_creator_offer_state_not_initialized() {
-        peer_trading::get_creator_offers(@0xACE);
+        broker_it_yourself::get_creator_offers(@0xACE);
     }
 
     #[test]
     fun test_remove_offer_from_cretor_offers() {
         let creators_offers = simple_map::create();
         simple_map::add(&mut creators_offers, @0xACE, vector[122, 123, 250, 281, 555]);
-        peer_trading::remove_offer_from_creator_offers(&mut creators_offers, &@0xACE, &123);
+        broker_it_yourself::remove_offer_from_creator_offers(&mut creators_offers, &@0xACE, &123);
 
         assert!(*simple_map::borrow(&creators_offers, &@0xACE) == vector[122, 250, 281, 555], 0);
     }
@@ -1739,7 +1739,7 @@ module overmind::peer_trading_tests {
     #[test]
     fun test_get_next_offer_id() {
         let offer_id = 22451;
-        let next_offer_id = peer_trading::get_next_offer_id(&mut offer_id);
+        let next_offer_id = broker_it_yourself::get_next_offer_id(&mut offer_id);
         assert!(offer_id == 22452, 0);
         assert!(next_offer_id == 22451, 1);
     }

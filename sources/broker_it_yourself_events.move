@@ -1,5 +1,5 @@
-module overmind::peer_trading_events {
-    friend overmind::peer_trading;
+module overmind::broker_it_yourself_events {
+    friend overmind::broker_it_yourself;
 
     struct CreateOfferEvent has store, drop {
         offer_id: u128,
