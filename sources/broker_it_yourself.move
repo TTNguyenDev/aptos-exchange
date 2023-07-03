@@ -186,7 +186,7 @@ module overmind::broker_it_yourself {
         vector::push_back(simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator)), offer_id);
 
         // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true && assert_user_has_enough_funds
-        assert_user_has_enough_funds();
+        assert_user_has_enough_funds(signer::address_of(creator), apt_amount);
         if (sell_apt == true) {
           let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
             coin::transfer<AptosCoin>(creator, signer::address_of(&resource_signer) , apt_amount);
@@ -220,7 +220,7 @@ module overmind::broker_it_yourself {
 
         // TODO: Transfer appropriate APT amount from the user to the PDA if Offer's sell_apt == false &&
         //      assert_user_has_enough_funds
-        assert_user_has_enough_funds();
+        assert_user_has_enough_funds(signer::address_of(user), offer.apt_amount);
         if (sell_apt == false) {
           let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
             coin::transfer<AptosCoin>(user, signer::address_of(&resource_signer) , offer.apt_amount);
@@ -302,7 +302,7 @@ module overmind::broker_it_yourself {
         remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator), &offer_id);
 
         // TODO: Transfer appropriate amount of APT from the PDA to the creator if the Offer's sell_apt == true
-        assert_user_has_enough_funds();
+        assert_user_has_enough_funds(signer::address_of(creator), offer.apt_amount);
         if (sell_apt == true) {
           let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
             coin::transfer<AptosCoin>(resource_signer, signer::address_of(&creator) , offer.apt_amount);
