@@ -11,12 +11,19 @@ module overmind::broker_it_yourself {
     use std::option::Option;
     use std::signer;
     use std::option;
+    use std::vector;
 
     use aptos_std::simple_map::{Self, SimpleMap};
     use aptos_framework::account::SignerCapability;
     use aptos_framework::event::EventHandle;
+    use aptos_framework::account;
+    use aptos_framework::coin;
+    use aptos_framework::aptos_coin::AptosCoin;
+    use aptos_framework::event;
+    use aptos_framework::timestamp;
 
     use overmind::broker_it_yourself_events::{CreateOfferEvent, AcceptOfferEvent, CompleteTransactionEvent, ReleaseFundsEvent, CancelOfferEvent, OpenDisputeEvent, ResolveDisputeEvent};
+    use overmind::broker_it_yourself_events;
 
     friend overmind::broker_it_yourself_tests;
 
@@ -101,12 +108,29 @@ module overmind::broker_it_yourself {
     */
     public entry fun init(admin: &signer) {
         // TODO: Call assert_signer_is_admin function
+        assert_signer_is_admin(admin);
 
         // TODO: Create a resource account using `SEED` global constant
+        let (resource, signer_cap) = aptos_framework::account::create_resource_account(admin, SEED);
 
         // TODO: Register the resource account with AptosCoin
+        coin::register<AptosCoin>(&resource);
 
         // TODO: Move State resource to the admin address
+        let resource_addr = signer::address_of(&resource);
+        move_to(admin, State {
+            offers: simple_map::create(),
+            creators_offers: simple_map::create(),
+            offer_id: 0,
+            cap: signer_cap,
+            create_offer_events: account::new_event_handle<CreateOfferEvent>(admin),
+            accept_offer_events: account::new_event_handle<AcceptOfferEvent>(admin),
+            complete_transaction_events: account::new_event_handle<CompleteTransactionEvent>(admin),
+            release_funds_events: account::new_event_handle<ReleaseFundsEvent>(admin),
+            cancel_offer_events: account::new_event_handle<CancelOfferEvent>(admin),
+            open_dispute_events: account::new_event_handle<OpenDisputeEvent>(admin),
+            resolve_dispute_events: account::new_event_handle<ResolveDisputeEvent>(admin)
+        });
     }
 
     /*
@@ -125,18 +149,46 @@ module overmind::broker_it_yourself {
         sell_apt: bool
     ) acquires State {
         // TODO: Call assert_state_initialized function
+        assert_state_initialized();
 
         // TODO: Call get_next_offer_id function
+        let offer_id = get_next_offer_id(borrow_global_mut<State>(@admin).state.offer_id);
 
         // TODO: Create instance of Offer struct
+        let offer = Offer {
+            // Address of the creator of the offer
+            creator: signer::address_of(creator),
+            // Address of the arbiter that can take actions when a dispute is opened
+            arbiter: @admin,
+            // Amount of APT coins
+            apt_amount,
+            // Amount of USD
+            usd_amount,
+            // Address of the counterparty for the offer
+            counterparty: option::none(),
+            // Instance of OfferCompletion
+            completion: OfferCompletion {
+                // Flag indicating if the creator marked the transaction as completed. False by default
+                creator: false,
+                // Flag indicating if the counterparty marked the transaction as completed. False by default
+                counterparty: false
+            },
+            // Flag indicating if a dispute for the offer is opened. False by default
+            dispute_opened: false,
+            // Flag indicating if the creator is selling or buying APT
+            sell_apt
+        };
 
         // TODO: Add the Offer instance to the list of available offers
+        simple_map::add(&mut borrow_global_mut<State>(@admin).offers, offer_id, offer);
 
         // TODO: Add the offer id to the creator's offers list
+        vector::push_back(simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).creators_offers, signer::address_of(creator)), offer_id);
 
         // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true && assert_user_has_enough_funds
 
         // TODO: Emit CreateOfferEvent event
+        event::emit_event(&mut borrow_global_mut<State>(@admin).create_offer_events, broker_it_yourself_events::new_create_offer_event(offer_id, signer::address_of(creator), @admin, apt_amount, usd_amount, sell_apt, timestamp::now_seconds()));
     }
 
     /*
