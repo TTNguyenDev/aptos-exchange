@@ -257,9 +257,9 @@ module overmind::broker_it_yourself {
         //              Offer's sell_apt flag
         //      4) Emit ReleaseFundsEvent event
         simple_map::remove(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
-        remove_offer_from_creator_offers(&borrow_global_mut<State>(@admin).creators_offers, signer::address_of(user), offer_id);
+        remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(user), &offer_id);
         // Transfer
-        event::emit_event(&mut borrow_global_mut<State>(@admin).release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, option::extract(offer.counterparty), timestamp::now_seconds()));
+        event::emit_event(&mut borrow_global_mut<State>(@admin).release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
     }
 
     /*
@@ -288,7 +288,7 @@ module overmind::broker_it_yourself {
         assert_dispute_not_opened(offer);
 
         // TODO: Remove the offer's id from the creator's offers list
-        remove_offer_from_creator_offers(&borrow_global_mut<State>(@admin).creators_offers, signer::address_of(creator), offer_id);
+        remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator), &offer_id);
 
         // TODO: Transfer appropriate amount of APT from the PDA to the creator if the Offer's sell_apt == true
 
@@ -319,7 +319,7 @@ module overmind::broker_it_yourself {
         offer.dispute_opened = true;
 
         // TODO: Emit OpenDisputeEvent event
-        event::emit_event(&mut borrow_global_mut<State>(@admin).open_dispute_events, broker_it_yourself_events::new_open_dispute_event(offer_id, option::extract(offer.counterparty), timestamp::now_seconds()));
+        event::emit_event(&mut borrow_global_mut<State>(@admin).open_dispute_events, broker_it_yourself_events::new_open_dispute_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
     }
 
     /*
@@ -352,7 +352,7 @@ module overmind::broker_it_yourself {
         simple_map::remove(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
 
         // TODO: Remove the offer's id from the creator's offers list
-        remove_offer_from_creator_offers(&borrow_global_mut<State>(@admin).creators_offers, &offer.creator, offer_id);
+        remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &offer.creator, &offer_id);
 
         // TODO: If transfer_to_creator send funds to creator, else if !transfer_to_creator send funds to counterparty
         //      if there is a counterparty
