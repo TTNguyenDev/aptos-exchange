@@ -270,6 +270,14 @@ module overmind::broker_it_yourself {
         simple_map::remove(&mut state.offers, &offer_id);
         remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(user), &offer_id);
         // Transfer
+        let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+        if (offer.sell_apt == true) {
+            coin::transfer<AptosCoin>(resource_signer, option::extract(offer.counterparty), offer.apt_amount);
+        } else {
+            coin::transfer<AptosCoin>(resource_signer, offer.creator, offer.apt_amount);
+
+        };
+
         event::emit_event(&mut state.release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
     }
 
