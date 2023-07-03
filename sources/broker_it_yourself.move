@@ -8,29 +8,13 @@
         resolve a dispute.
 */
 module overmind::broker_it_yourself {
-    use aptos_std::simple_map::SimpleMap;
     use std::option::Option;
+
+    use aptos_std::simple_map::SimpleMap;
     use aptos_framework::account::SignerCapability;
-    use std::signer;
-    use aptos_framework::account;
-    use aptos_std::simple_map;
-    use aptos_framework::coin;
-    use aptos_framework::aptos_coin::AptosCoin;
-    use std::option;
-    use std::vector;
     use aptos_framework::event::EventHandle;
-    use overmind::broker_it_yourself_events::{
-        Self,
-        CreateOfferEvent,
-        AcceptOfferEvent,
-        CompleteTransactionEvent,
-        ReleaseFundsEvent,
-        CancelOfferEvent,
-        OpenDisputeEvent,
-        ResolveDisputeEvent
-    };
-    use aptos_framework::event;
-    use aptos_framework::timestamp;
+
+    use overmind::broker_it_yourself_events::{CreateOfferEvent, AcceptOfferEvent, CompleteTransactionEvent, ReleaseFundsEvent, CancelOfferEvent, OpenDisputeEvent, ResolveDisputeEvent};
 
     friend overmind::broker_it_yourself_tests;
 
@@ -55,8 +39,8 @@ module overmind::broker_it_yourself {
     const SEED: vector<u8> = b"broker_it_yourself";
 
     /*
-        Resource struct holding data about available offers
-    */
+      Resource struct holding data about available offers
+  */
     struct State has key {
         // List of available offers
         offers: SimpleMap<u128, Offer>,
@@ -92,7 +76,7 @@ module overmind::broker_it_yourself {
         counterparty: Option<address>,
         // Instance of OfferCompletion
         completion: OfferCompletion,
-        // Flag indicating if a dispute for the offer is opened. False by default
+        // Flag indicating if a dispute for the offer is opened
         dispute_opened: bool,
         // Flag indicating if the creator is selling or buying APT
         sell_apt: bool
@@ -103,9 +87,9 @@ module overmind::broker_it_yourself {
         both flags have value of `true`
     */
     struct OfferCompletion has store, drop, copy {
-        // Flag indicating if the creator marked the transaction as completed. False by default
+        // Flag indicating if the creator marked the transaction as completed
         creator: bool,
-        // Flag indicating if the counterparty marked the transaction as completed. False by default
+        // Flag indicating if the counterparty marked the transaction as completed
         counterparty: bool
     }
 
@@ -148,7 +132,7 @@ module overmind::broker_it_yourself {
 
         // TODO: Add the offer id to the creator's offers list
 
-        // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true
+        // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true && assert_user_has_enough_funds
 
         // TODO: Emit CreateOfferEvent event
     }
@@ -169,7 +153,7 @@ module overmind::broker_it_yourself {
 
         // TODO: Set Offer's counterparty field to the address of the user
 
-        // TODO: Transfer appropriate APT amount from the user to the PDA if Offer's sell_apt == false
+        // TODO: Transfer appropriate APT amount from the user to the PDA if Offer's sell_apt == false && assert_user_has_enough_funds
 
         // TODO: Emit AcceptOfferEvent event
     }
@@ -189,7 +173,7 @@ module overmind::broker_it_yourself {
 
         // TODO: call assert_user_participates_in_transaction function
 
-        // TODO: call assert_user_has_not_marked_completed_yet function
+        // TODO: call assert_user_has_not_marked_completed_yet function'
 
         // TODO: call assert_dispute_not_opened function
 
@@ -260,7 +244,6 @@ module overmind::broker_it_yourself {
     public entry fun resolve_dispute(
         arbiter: &signer,
         offer_id: u128,
-        terminate_offer: bool,
         transfer_to_creator: bool
     ) acquires State {
         // TODO: Call assert_state_initialized function
@@ -269,18 +252,25 @@ module overmind::broker_it_yourself {
 
         // TODO: Call assert_dispute_opened function
 
-        // TODO: Call assert_dispute_opened function
+        // TODO: Call assert_singer_is_arbiter function
 
-        // TODO: If terminate_offer == true:
-        //      1) Remove the offer from the list of available offers
-        //      2) Remove the offer's id from the creator's offers list
-        //      3) If transfer_to_creator == true, transfer appropriate amount of APT from the PDA to the creator
-        //      4) If transfer_to_creator == false && anyone accepted the offer, transfer appropriate amount of APT
-        //              from the PDA to the counterparty
-        //      5) Otherwise set the Offer's dispute_opened, creator's completion and counterparty's completion flags
-        //              to false
+        // TODO: Remove the offer from the list of available offers
+
+        // TODO: Remove the offer's id from the creator's offers list
+
+        // TODO: If transfer_to_creator send funds to creator, else if !transfer_to_creator send funds to counterparty if there is a counterparty
 
         // TODO: Emit ResolveDisputeEvent event
+    }
+
+    /*
+    Returns the list of all offers
+    @returns - list of all offers
+    */
+    #[view]
+    public fun get_all_offers(): SimpleMap<u128, Offer> acquires State {
+        // TODO: Call assert_state_initialized function
+        // TODO: Returns the list of all offers
     }
 
     /*
@@ -292,6 +282,39 @@ module overmind::broker_it_yourself {
         // TODO: Call assert_state_initialized function
 
         // TODO: Return the list of available offers
+    }
+
+    /*
+    Returns a list of the offers that have dispute opened.
+    @returns - list of offers with flag dispute_opened set to true
+*/
+    #[view]
+    public fun get_arbitration_offers(): SimpleMap<u128, Offer> acquires State {
+        // TODO: Call assert_state_initialized function
+
+        // TODO: Returns a list of the offers that have dispute opened
+    }
+
+    /*
+    Returns a list of the provided creator's buy offers.
+    @returns - list of the creator's offers with flag sell_apt set to false
+*/
+    #[view]
+    public fun get_buy_offers(creator: address): SimpleMap<u128, Offer> acquires State {
+        // TODO: Call assert_state_initialized function
+
+        // TODO: Returns a list of the provided creator's buy offers
+    }
+
+    /*
+    Returns a list of the provided creator's sell offers.
+    @returns - list of the creator's offers with flag sell_apt set to true
+*/
+    #[view]
+    public fun get_sell_offers(creator: address): SimpleMap<u128, Offer> acquires State {
+        // TODO: Call assert_state_initialized function
+
+        // TODO: Returns a list of the provided creator's sell offers
     }
 
     /*
@@ -380,8 +403,8 @@ module overmind::broker_it_yourself {
         // TODO: Assert that a dispute is opened
     }
 
-    inline fun assert_signer_is_arbiter(arbiter: &signer, offer: &Offer) {
-        // TODO: Assert that the provided arbiter is the arbiter of the provided offer
+    inline fun assert_singer_is_arbiter(arbiter: &signer, offer: &Offer) {
+        // TODO: Assert that the provided signer is the arbiter of the provided offer
     }
 
     /////////////////////////

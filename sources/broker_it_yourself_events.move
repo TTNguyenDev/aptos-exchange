@@ -42,7 +42,7 @@ module overmind::broker_it_yourself_events {
 
     struct ResolveDisputeEvent has store, drop {
         offer_id: u128,
-        terminated: bool,
+        transfer_to_creator: bool,
         timestamp: u64
     }
 
@@ -92,9 +92,9 @@ module overmind::broker_it_yourself_events {
 
     public(friend) fun new_resolve_dispute_event(
         offer_id: u128,
-        terminated: bool,
+        transfer_to_creator: bool,
         timestamp: u64
     ): ResolveDisputeEvent {
-        ResolveDisputeEvent { offer_id, terminated, timestamp }
+        ResolveDisputeEvent { offer_id, transfer_to_creator, timestamp }
     }
 }
