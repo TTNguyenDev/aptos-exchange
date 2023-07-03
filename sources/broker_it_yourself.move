@@ -432,8 +432,22 @@ module overmind::broker_it_yourself {
     #[view]
     public fun get_buy_offers(creator: address): SimpleMap<u128, Offer> acquires State {
         // TODO: Call assert_state_initialized function
+        assert_state_initialized();
 
         // TODO: Returns a list of the provided creator's buy offers
+        let offers = borrow_global<State>(@admin).offers;
+        let result = simple_map::create();
+
+        let len = borrow_global<State>(@admin).offer_id;
+        let i = 0;
+        while (i < len) {
+            let offer = *simple_map::borrow(&offers, &i);
+            if (offer.sell_apt == false) {
+                simple_map::add(&mut result, i, offer);
+            };
+            i = i + 1;
+        };
+        result
     }
 
     /*
@@ -443,9 +457,22 @@ module overmind::broker_it_yourself {
     #[view]
     public fun get_sell_offers(creator: address): SimpleMap<u128, Offer> acquires State {
         // TODO: Call assert_state_initialized function
-        // assert_state_initialized();
+        assert_state_initialized();
 
         // TODO: Returns a list of the provided creator's sell offers
+        let offers = borrow_global<State>(@admin).offers;
+        let result = simple_map::create();
+
+        let len = borrow_global<State>(@admin).offer_id;
+        let i = 0;
+        while (i < len) {
+            let offer = *simple_map::borrow(&offers, &i);
+            if (offer.sell_apt) {
+                simple_map::add(&mut result, i, offer);
+            };
+            i = i + 1;
+        };
+        result
     }
 
     /*
@@ -526,6 +553,7 @@ module overmind::broker_it_yourself {
 
     inline fun assert_user_has_enough_funds<CoinType>(user: address, coin_amount: u64) {
         // TODO: Assert that the provided user's balance equals or is greater than the coin_amount
+        assert!(coin::balance<AptosCoin>(user) >= coin_amount, ERROR_INSUFFICIENT_FUNDS);
     }
 
     inline fun assert_offer_exists(
