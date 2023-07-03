@@ -151,7 +151,7 @@ module overmind::broker_it_yourself {
         assert_state_initialized();
 
         // TODO: Call get_next_offer_id function
-        let offer_id = get_next_offer_id(&mut borrow_global_mut<State>(@admin).offer_id) - 1;
+        let offer_id = get_next_offer_id(&mut borrow_global_mut<State>(@admin).offer_id);
 
         // TODO: Create instance of Offer struct
         let offer = Offer {
@@ -472,11 +472,13 @@ module overmind::broker_it_yourself {
         let len = borrow_global<State>(@admin).offer_id;
         let i = 0;
         while (i < len) {
-            let offer = *simple_map::borrow(&offers, &i);
-            if (offer.dispute_opened) {
-                simple_map::add(&mut result, i, offer);
-            };
-            i = i + 1;
+            if (simple_map::contains_key(&offers, &i)) {
+                let offer = *simple_map::borrow(&offers, &i);
+                if (offer.dispute_opened) {
+                    simple_map::add(&mut result, i, offer);
+                };
+                i = i + 1;
+            }
         };
         result
     }
@@ -590,7 +592,7 @@ module overmind::broker_it_yourself {
     public(friend) inline fun get_next_offer_id(offer_id: &mut u128): u128 {
         // TODO: Return a copy of offer_id and increment the original by one
         *offer_id = *offer_id + 1;
-        *offer_id
+        *offer_id - 1
     }
 
     /////////////
