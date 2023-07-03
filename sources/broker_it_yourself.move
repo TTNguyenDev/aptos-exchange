@@ -287,7 +287,6 @@ module overmind::broker_it_yourself {
                 coin::transfer<AptosCoin>(&resource_signer, option::extract(&mut offer.counterparty), offer.apt_amount);
             } else {
                 coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
-
             };
 
             event::emit_event(&mut state.release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, address, timestamp::now_seconds()));
@@ -475,7 +474,7 @@ module overmind::broker_it_yourself {
         while (i < len) {
             if (simple_map::contains_key(&offers, &i)) {
                 let offer = *simple_map::borrow(&offers, &i);
-                if (offer.dispute_opened) {
+                if (offer.dispute_opened == true) {
                     simple_map::add(&mut result, i, offer);
                 };
                 i = i + 1;
