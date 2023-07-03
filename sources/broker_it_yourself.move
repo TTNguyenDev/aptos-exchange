@@ -117,7 +117,6 @@ module overmind::broker_it_yourself {
         coin::register<AptosCoin>(&resource);
 
         // TODO: Move State resource to the admin address
-        let resource_addr = signer::address_of(&resource);
         move_to(admin, State {
             offers: simple_map::create(),
             creators_offers: simple_map::create(),
@@ -159,7 +158,7 @@ module overmind::broker_it_yourself {
             // Address of the creator of the offer
             creator: signer::address_of(creator),
             // Address of the arbiter that can take actions when a dispute is opened
-            arbiter: @admin,
+            arbiter,
             // Amount of APT coins
             apt_amount,
             // Amount of USD
