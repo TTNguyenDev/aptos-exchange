@@ -572,17 +572,19 @@ module overmind::broker_it_yourself {
         offer_id: &u128
     ) {
         // TODO: Find and remove the provided offer_id from the provided creator's offers list
-        let offers = simple_map::borrow_mut(creators_offers, creator); 
-        let len = vector::length(offers);
+        let offers = *simple_map::borrow(creators_offers, creator); 
+        let len = vector::length(&offers);
+        let vec = vector::empty<u128>();
         let i = 0;
         while (i < len) {
-            let entry = vector::borrow(offers, i);
-            if (entry == offer_id) {
-                vector::swap_remove(offers, i);
-                break 
+            let entry = vector::borrow(&offers, i);
+            if (entry != offer_id) {
+                vector::push_back(&mut vec, *entry);
             };
             i = i + 1;
         };
+        simple_map::remove(creators_offers, creator);
+        simple_map::add(creators_offers, *creator, vec);
     }
 
     /*
