@@ -326,8 +326,11 @@ module overmind::broker_it_yourself {
     #[view]
     public fun get_all_offers(): SimpleMap<u128, Offer> acquires State {
         // TODO: Call assert_state_initialized function
+        assert_state_initialized();
 
         // TODO: Returns the list of all offers
+        borrow_global<State>(@admin).offers
+
     }
 
     /*
@@ -337,8 +340,22 @@ module overmind::broker_it_yourself {
     #[view]
     public fun get_available_offers(): SimpleMap<u128, Offer> acquires State {
         // TODO: Call assert_state_initialized function
+        assert_state_initialized();
 
         // TODO: Return a list of not accepted offers
+        let offers = borrow_global<State>(@admin).offers;
+        let result = simple_map::create();
+
+        let len = borrow_global<State>(@admin).offer_id;
+        let i = 0;
+        while (i < len) {
+            let offer = *simple_map::borrow(&offers, &i);
+            if (option::is_none(&offer.counterparty)) {
+                simple_map::add(&mut result, i, offer);
+            };
+            i = i + 1;
+        };
+        result
     }
 
     /*
@@ -348,8 +365,22 @@ module overmind::broker_it_yourself {
     #[view]
     public fun get_arbitration_offers(): SimpleMap<u128, Offer> acquires State {
         // TODO: Call assert_state_initialized function
+        assert_state_initialized();
 
         // TODO: Returns a list of the offers that have dispute opened
+        let offers = borrow_global<State>(@admin).offers;
+        let result = simple_map::create();
+
+        let len = borrow_global<State>(@admin).offer_id;
+        let i = 0;
+        while (i < len) {
+            let offer = *simple_map::borrow(&offers, &i);
+            if (offer.dispute_opened) {
+                simple_map::add(&mut result, i, offer);
+            };
+            i = i + 1;
+        };
+        result
     }
 
     /*
@@ -370,6 +401,7 @@ module overmind::broker_it_yourself {
     #[view]
     public fun get_sell_offers(creator: address): SimpleMap<u128, Offer> acquires State {
         // TODO: Call assert_state_initialized function
+        // assert_state_initialized();
 
         // TODO: Returns a list of the provided creator's sell offers
     }
@@ -381,23 +413,23 @@ module overmind::broker_it_yourself {
     */
     #[view]
     public fun get_creator_offers(creator: address): SimpleMap<u128, Offer> acquires State {
-        // // TODO: Call assert_state_initialized function
-        // assert_state_initialized();
-        //
-        // // TODO: Filter the list of available offers and return only those that were created by the provided creator
-        // let ids = simple_map::borrow(&borrow_global<State>(@admin).creators_offers, &creator);
-        // let offers = borrow_global<State>(@admin).offers;
-        //
-        // let result = simple_map::create();
-        // let len = vector::length(ids);
-        // let i = 0;
-        // while (i < len) {
-        //     let id = vector::borrow(ids, i);
-        //     let offer = simple_map::borrow(&offers, id);
-        //     simple_map::add(&mut result, id, offer);
-        //     i = i + 1;
-        // };
-        // result
+        // TODO: Call assert_state_initialized function
+        assert_state_initialized();
+
+        // TODO: Filter the list of available offers and return only those that were created by the provided creator
+        let ids = simple_map::borrow(&borrow_global<State>(@admin).creators_offers, &creator);
+        let offers = borrow_global<State>(@admin).offers;
+
+        let result = simple_map::create();
+        let len = vector::length(ids);
+        let i = 0;
+        while (i < len) {
+            let id = *vector::borrow(ids, i);
+            let offer = *simple_map::borrow(&offers, &id);
+            simple_map::add(&mut result, id, offer);
+            i = i + 1;
+        };
+        result
     }
 
     /*
