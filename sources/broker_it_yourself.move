@@ -272,9 +272,9 @@ module overmind::broker_it_yourself {
         // Transfer
         let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
         if (offer.sell_apt == true) {
-            coin::transfer<AptosCoin>(resource_signer, option::extract(offer.counterparty), offer.apt_amount);
+            coin::transfer<AptosCoin>(&resource_signer, option::extract(&mut offer.counterparty), offer.apt_amount);
         } else {
-            coin::transfer<AptosCoin>(resource_signer, offer.creator, offer.apt_amount);
+            coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
 
         };
 
@@ -382,13 +382,12 @@ module overmind::broker_it_yourself {
 
         // TODO: If transfer_to_creator send funds to creator, else if !transfer_to_creator send funds to counterparty
         //      if there is a counterparty
-
-        assert_user_has_enough_funds(signer::address_of(creator), offer.apt_amount);
         let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+        assert_user_has_enough_funds(signer::address_of(&resource_signer), offer.apt_amount);
         if (transfer_to_creator) {
-            coin::transfer<AptosCoin>(resource_signer, offer.creator, offer.apt_amount);
-        } else if (option::is_some(offer.counterparty)) {
-            coin::transfer<AptosCoin>(resource_signer, option::extract(&offer.creator), offer.apt_amount);
+            coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
+        } else if (option::is_some(&offer.counterparty)) {
+            coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
         };
 
         // TODO: Emit ResolveDisputeEvent event
