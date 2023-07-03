@@ -267,6 +267,30 @@ module overmind::broker_it_yourself {
         assert_dispute_not_opened(&offer);
 
         // TODO: Compare the user's address and set appropriate completion flag to true
+        let address = signer::address_of(user);
+        if (address == offer.creator) {
+            offer.completion.creator = true;
+        } else if (option::some(address) == offer.counterparty) {
+            offer.completion.counterparty = true;
+        };
+
+        event::emit_event(&mut state.complete_transaction_events, broker_it_yourself_events::new_complete_transaction_event(offer_id, address, timestamp::now_seconds()));
+
+
+        if (offer.completion.creator == true && offer.completion.counterparty == true) {
+            simple_map::remove(&mut state.offers, &offer_id);
+            remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(user), &offer_id);
+            // Transfer
+            let resource_signer = account::create_signer_with_capability(&mut state.cap);
+            if (offer.sell_apt == true) {
+                coin::transfer<AptosCoin>(&resource_signer, option::extract(&mut offer.counterparty), offer.apt_amount);
+            } else {
+                coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
+
+            };
+
+            event::emit_event(&mut state.release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, address, timestamp::now_seconds()));
+        };
 
         // TODO: Emit CompleteTransactionEvent event
 
@@ -276,18 +300,6 @@ module overmind::broker_it_yourself {
         //      3) Transfer appropriate amount of APT either to the creator or the counterparty depending on the
         //              Offer's sell_apt flag
         //      4) Emit ReleaseFundsEvent event
-        simple_map::remove(&mut state.offers, &offer_id);
-        remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(user), &offer_id);
-        // Transfer
-        let resource_signer = account::create_signer_with_capability(&mut state.cap);
-        if (offer.sell_apt == true) {
-            coin::transfer<AptosCoin>(&resource_signer, option::extract(&mut offer.counterparty), offer.apt_amount);
-        } else {
-            coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
-
-        };
-
-        event::emit_event(&mut state.release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
     }
 
     /*
