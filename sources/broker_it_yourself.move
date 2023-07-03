@@ -320,7 +320,8 @@ module overmind::broker_it_yourself {
         remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(creator), &offer_id);
 
         // TODO: Transfer appropriate amount of APT from the PDA to the creator if the Offer's sell_apt == true
-        assert_user_has_enough_funds<AptosCoin>(signer::address_of(creator), offer.apt_amount);
+        let resource_signer = account::create_signer_with_capability(&mut state.cap);
+        assert_user_has_enough_funds<AptosCoin>(signer::address_of(&resource_signer), offer.apt_amount);
         if (offer.sell_apt == true) {
           let resource_signer = account::create_signer_with_capability(&mut state.cap);
             coin::transfer<AptosCoin>(&resource_signer, signer::address_of(creator) , offer.apt_amount);
@@ -596,7 +597,7 @@ module overmind::broker_it_yourself {
 
     inline fun assert_user_has_enough_funds<CoinType>(user: address, coin_amount: u64) {
         // TODO: Assert that the provided user's balance equals or is greater than the coin_amount
-        assert!(coin::balance<AptosCoin>(user) >= coin_amount, ERROR_INSUFFICIENT_FUNDS);
+        assert!(coin::balance<CoinType>(user) >= coin_amount, ERROR_INSUFFICIENT_FUNDS);
     }
 
     inline fun assert_offer_exists(
