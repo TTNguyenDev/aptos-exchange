@@ -209,7 +209,8 @@ module overmind::broker_it_yourself {
         assert_offer_exists(&borrow_global<State>(@admin).offers, &offer_id);
 
         // TODO: Call assert_offer_not_accepted function
-        let offer = simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
+        let state = borrow_global_mut<State>(@admin);
+        let offer = simple_map::borrow_mut(&mut state.offers, &offer_id);
         assert_offer_not_accepted(offer);
 
         // TODO: Call assert_dispute_not_opened function
@@ -224,12 +225,12 @@ module overmind::broker_it_yourself {
         let add = signer::address_of(user);
         assert_user_has_enough_funds<AptosCoin>(add, amount);
         if (offer.sell_apt == false) {
-          let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+          let resource_signer = account::create_signer_with_capability(&mut state.cap);
             coin::transfer<AptosCoin>(user, signer::address_of(&resource_signer) , offer.apt_amount);
         };
 
         // TODO: Emit AcceptOfferEvent event
-        event::emit_event(&mut borrow_global_mut<State>(@admin).accept_offer_events, broker_it_yourself_events::new_accept_offer_event(offer_id, signer::address_of(user), timestamp::now_seconds()));
+        event::emit_event(&mut state.accept_offer_events, broker_it_yourself_events::new_accept_offer_event(offer_id, signer::address_of(user), timestamp::now_seconds()));
     }
 
     /*
@@ -272,7 +273,7 @@ module overmind::broker_it_yourself {
         simple_map::remove(&mut state.offers, &offer_id);
         remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(user), &offer_id);
         // Transfer
-        let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+        let resource_signer = account::create_signer_with_capability(&mut state.cap);
         if (offer.sell_apt == true) {
             coin::transfer<AptosCoin>(&resource_signer, option::extract(&mut offer.counterparty), offer.apt_amount);
         } else {
@@ -296,25 +297,26 @@ module overmind::broker_it_yourself {
         assert_offer_exists(&borrow_global<State>(@admin).offers, &offer_id);
 
         // TODO: Remove the offer from the list of available offers
-        simple_map::remove(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
+        let state = borrow_global_mut<State>(@admin);
+        let offer = *simple_map::borrow_mut(&mut state.offers, &offer_id);
+        simple_map::remove(&mut state.offers, &offer_id);
 
         // TODO: Call assert_signer_is_creator function
-        let offer = simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
-        assert_signer_is_creator(creator, offer);
+        assert_signer_is_creator(creator, &offer);
 
         // TODO: Call assert_offer_not_accepted function
-        assert_offer_not_accepted(offer);
+        assert_offer_not_accepted(&offer);
 
         // TODO: Call assert_dispute_not_opened function
-        assert_dispute_not_opened(offer);
+        assert_dispute_not_opened(&offer);
 
         // TODO: Remove the offer's id from the creator's offers list
-        remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator), &offer_id);
+        remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(creator), &offer_id);
 
         // TODO: Transfer appropriate amount of APT from the PDA to the creator if the Offer's sell_apt == true
         assert_user_has_enough_funds<AptosCoin>(signer::address_of(creator), offer.apt_amount);
         if (offer.sell_apt == true) {
-          let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+          let resource_signer = account::create_signer_with_capability(&mut state.cap);
             coin::transfer<AptosCoin>(&resource_signer, signer::address_of(creator) , offer.apt_amount);
         };
 
@@ -384,7 +386,7 @@ module overmind::broker_it_yourself {
 
         // TODO: If transfer_to_creator send funds to creator, else if !transfer_to_creator send funds to counterparty
         //      if there is a counterparty
-        let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+        let resource_signer = account::create_signer_with_capability(&mut state.cap);
         assert_user_has_enough_funds<AptosCoin>(signer::address_of(&resource_signer), offer.apt_amount);
         if (transfer_to_creator) {
             coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
