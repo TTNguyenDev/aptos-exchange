@@ -333,8 +333,8 @@ module overmind::broker_it_yourself {
 
         // TODO: Transfer appropriate amount of APT from the PDA to the creator if the Offer's sell_apt == true
         let resource_signer = account::create_signer_with_capability(&mut state.cap);
-        assert_user_has_enough_funds<AptosCoin>(signer::address_of(&resource_signer), offer.apt_amount);
         if (offer.sell_apt == true) {
+        assert_user_has_enough_funds<AptosCoin>(signer::address_of(&resource_signer), offer.apt_amount);
           let resource_signer = account::create_signer_with_capability(&mut state.cap);
             coin::transfer<AptosCoin>(&resource_signer, signer::address_of(creator) , offer.apt_amount);
         };
@@ -410,7 +410,7 @@ module overmind::broker_it_yourself {
         if (transfer_to_creator) {
             coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
         } else if (option::is_some(&offer.counterparty)) {
-            coin::transfer<AptosCoin>(&resource_signer, offer.creator, offer.apt_amount);
+            coin::transfer<AptosCoin>(&resource_signer, option::extract(&mut offer.counterparty), offer.apt_amount);
         };
 
         // TODO: Emit ResolveDisputeEvent event
