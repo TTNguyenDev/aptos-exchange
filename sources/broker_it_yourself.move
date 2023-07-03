@@ -570,8 +570,9 @@ module overmind::broker_it_yourself {
     */
     public(friend) inline fun get_next_offer_id(offer_id: &mut u128): u128 {
         // TODO: Return a copy of offer_id and increment the original by one
-        let offer_id = borrow_global<State>(@admin).offer_id;
-        offer_id + 1
+        let cur = *offer_id;
+        cur = cur + 1;
+        cur
     }
 
     /////////////
