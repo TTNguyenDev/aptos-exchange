@@ -302,7 +302,7 @@ module overmind::broker_it_yourself {
 
         // TODO: Transfer appropriate amount of APT from the PDA to the creator if the Offer's sell_apt == true
         assert_user_has_enough_funds();
-        if (sell_apt == false) {
+        if (sell_apt == true) {
           let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
             coin::transfer<AptosCoin>(resource_signer, signer::address_of(&creator) , offer.apt_amount);
         };
