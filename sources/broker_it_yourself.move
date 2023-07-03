@@ -9,8 +9,10 @@
 */
 module overmind::broker_it_yourself {
     use std::option::Option;
+    use std::signer;
+    use std::option;
 
-    use aptos_std::simple_map::SimpleMap;
+    use aptos_std::simple_map::{Self, SimpleMap};
     use aptos_framework::account::SignerCapability;
     use aptos_framework::event::EventHandle;
 
@@ -361,10 +363,12 @@ module overmind::broker_it_yourself {
 
     inline fun assert_signer_is_admin(admin: &signer) {
         // TODO: Assert that the provided admin is the same as in Move.toml file
+        assert!(signer::address_of(admin) == @admin, ERROR_SIGNER_NOT_ADMIN);
     }
 
     inline fun assert_state_initialized() {
         // TODO: Assert that State resource exists under the admin's address
+        assert!(exists<State>(@admin), ERROR_STATE_NOT_INITIALIZED);
     }
 
     inline fun assert_user_has_enough_funds<CoinType>(user: address, coin_amount: u64) {
@@ -376,38 +380,52 @@ module overmind::broker_it_yourself {
         offer_id: &u128
     ) {
         // TODO: Assert that the offers contains the offer_id
+        assert!(simple_map::contains_key(offers, offer_id), ERROR_OFFER_DOES_NOT_EXIST);
     }
 
     inline fun assert_offer_not_accepted(offer: &Offer) {
         // TODO: Assert that the offer does not have counterparty value
+        assert!(option::is_none(&offer.counterparty), ERROR_OFFER_ALREADY_ACCEPTED);
     }
 
     inline fun assert_offer_accepted(offer: &Offer) {
         // TODO: Assert that the offer has counterparty value
+        assert!(option::is_some(&offer.counterparty), ERROR_OFFER_NOT_ACCEPTED);
     }
 
     inline fun assert_user_participates_in_transaction(user: address, offer: &Offer) {
         // TODO: Assert that the provided user's address is either the creator or the counterparty
+        assert!(user == offer.creator || option::some(user) == offer.counterparty, ERROR_USER_DOES_NOT_PARTICIPATE_IN_TRANSACTION);
     }
 
     inline fun assert_user_has_not_marked_completed_yet(user: address, offer: &Offer) {
         // TODO: Assert that the user has not marked the offer as completed yet (cover all cases)
+        if (user == offer.creator) {
+            assert!(offer.completion.creator == false, ERROR_USER_ALREADY_MARKED_AS_COMPLETED);
+        } else if (option::some(user) ==  offer.counterparty) {
+            assert!(offer.completion.counterparty == false,
+                ERROR_USER_ALREADY_MARKED_AS_COMPLETED);
+        }
     }
 
     inline fun assert_signer_is_creator(creator: &signer, offer: &Offer) {
         // TODO: Assert that the provided creator is the creator of the provided offer
+        assert!(offer.creator == signer::address_of(creator), ERROR_SIGNER_NOT_CREATOR);
     }
 
     inline fun assert_dispute_not_opened(offer: &Offer) {
         // TODO: Assert that a dispute is not opened
+        assert!(offer.dispute_opened == false, ERROR_DISPUTE_ALREADY_OPENED);
     }
 
     inline fun assert_dispute_opened(offer: &Offer) {
         // TODO: Assert that a dispute is opened
+        assert!(offer.dispute_opened == true, ERROR_DISPUTE_NOT_OPENED);
     }
 
     inline fun assert_singer_is_arbiter(arbiter: &signer, offer: &Offer) {
         // TODO: Assert that the provided signer is the arbiter of the provided offer
+        assert!(offer.arbiter == signer::address_of(arbiter), ERROR_SIGNER_NOT_ARBITER);
     }
 
     /////////////////////////
