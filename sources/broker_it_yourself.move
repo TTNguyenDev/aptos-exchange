@@ -479,7 +479,7 @@ module overmind::broker_it_yourself {
         let i = 0;
         while (i < len) {
             let offer = *simple_map::borrow(&offers, &i);
-            if (offer.sell_apt == false) {
+            if (offer.sell_apt == false && offer.creator == creator) {
                 simple_map::add(&mut result, i, offer);
             };
             i = i + 1;
@@ -504,7 +504,7 @@ module overmind::broker_it_yourself {
         let i = 0;
         while (i < len) {
             let offer = *simple_map::borrow(&offers, &i);
-            if (offer.sell_apt) {
+            if (offer.sell_apt && offer.creator == creator) {
                 simple_map::add(&mut result, i, offer);
             };
             i = i + 1;
@@ -557,7 +557,7 @@ module overmind::broker_it_yourself {
             let entry = vector::borrow(offers, i);
             if (entry == offer_id) {
                 vector::swap_remove(offers, i);
-                break; 
+                break 
             };
             i = i + 1;
         };
