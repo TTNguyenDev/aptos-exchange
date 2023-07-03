@@ -152,7 +152,7 @@ module overmind::broker_it_yourself {
         assert_state_initialized();
 
         // TODO: Call get_next_offer_id function
-        let offer_id = get_next_offer_id(borrow_global_mut<State>(@admin).state.offer_id);
+        let offer_id = get_next_offer_id(&mut borrow_global_mut<State>(@admin).offer_id);
 
         // TODO: Create instance of Offer struct
         let offer = Offer {
@@ -183,7 +183,7 @@ module overmind::broker_it_yourself {
         simple_map::add(&mut borrow_global_mut<State>(@admin).offers, offer_id, offer);
 
         // TODO: Add the offer id to the creator's offers list
-        vector::push_back(simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).creators_offers, signer::address_of(creator)), offer_id);
+        vector::push_back(simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator)), offer_id);
 
         // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true && assert_user_has_enough_funds
 
@@ -381,10 +381,23 @@ module overmind::broker_it_yourself {
     */
     #[view]
     public fun get_creator_offers(creator: address): SimpleMap<u128, Offer> acquires State {
-        // TODO: Call assert_state_initialized function
-        assert_state_initialized();
-
-        // TODO: Filter the list of available offers and return only those that were created by the provided creator
+        // // TODO: Call assert_state_initialized function
+        // assert_state_initialized();
+        //
+        // // TODO: Filter the list of available offers and return only those that were created by the provided creator
+        // let ids = simple_map::borrow(&borrow_global<State>(@admin).creators_offers, &creator);
+        // let offers = borrow_global<State>(@admin).offers;
+        //
+        // let result = simple_map::create();
+        // let len = vector::length(ids);
+        // let i = 0;
+        // while (i < len) {
+        //     let id = vector::borrow(ids, i);
+        //     let offer = simple_map::borrow(&offers, id);
+        //     simple_map::add(&mut result, id, offer);
+        //     i = i + 1;
+        // };
+        // result
     }
 
     /*
@@ -399,13 +412,13 @@ module overmind::broker_it_yourself {
         offer_id: &u128
     ) {
         // TODO: Find and remove the provided offer_id from the provided creator's offers list
-        let offers = simple_map::borrow(creators_offers, creator); 
+        let offers = simple_map::borrow_mut(creators_offers, creator); 
         let len = vector::length(offers);
         let i = 0;
         while (i < len) {
             let entry = vector::borrow(offers, i);
             if (entry == offer_id) {
-                vector::swap_remove(bucket, i);
+                vector::swap_remove(offers, i);
                 break; 
             };
             i = i + 1;
