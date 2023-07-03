@@ -383,6 +383,14 @@ module overmind::broker_it_yourself {
         // TODO: If transfer_to_creator send funds to creator, else if !transfer_to_creator send funds to counterparty
         //      if there is a counterparty
 
+        assert_user_has_enough_funds(signer::address_of(creator), offer.apt_amount);
+        let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+        if (transfer_to_creator) {
+            coin::transfer<AptosCoin>(resource_signer, offer.creator, offer.apt_amount);
+        } else if (option::is_some(offer.counterparty)) {
+            coin::transfer<AptosCoin>(resource_signer, option::extract(&offer.creator), offer.apt_amount);
+        };
+
         // TODO: Emit ResolveDisputeEvent event
         event::emit_event(&mut state.resolve_dispute_events, broker_it_yourself_events::new_resolve_dispute_event(offer_id, transfer_to_creator, timestamp::now_seconds()));
     }
