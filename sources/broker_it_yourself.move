@@ -186,6 +186,11 @@ module overmind::broker_it_yourself {
         vector::push_back(simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator)), offer_id);
 
         // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true && assert_user_has_enough_funds
+        assert_user_has_enough_funds();
+        if (sell_apt == true) {
+          let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+            coin::transfer<AptosCoin>(creator, signer::address_of(&resource_signer) , apt_amount);
+        };
 
         // TODO: Emit CreateOfferEvent event
         event::emit_event(&mut borrow_global_mut<State>(@admin).create_offer_events, broker_it_yourself_events::new_create_offer_event(offer_id, signer::address_of(creator), @admin, apt_amount, usd_amount, sell_apt, timestamp::now_seconds()));
@@ -215,6 +220,11 @@ module overmind::broker_it_yourself {
 
         // TODO: Transfer appropriate APT amount from the user to the PDA if Offer's sell_apt == false &&
         //      assert_user_has_enough_funds
+        assert_user_has_enough_funds();
+        if (sell_apt == false) {
+          let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+            coin::transfer<AptosCoin>(user, signer::address_of(&resource_signer) , offer.apt_amount);
+        };
 
         // TODO: Emit AcceptOfferEvent event
         event::emit_event(&mut borrow_global_mut<State>(@admin).accept_offer_events, broker_it_yourself_events::new_accept_offer_event(offer_id, signer::address_of(user), timestamp::now_seconds()));
