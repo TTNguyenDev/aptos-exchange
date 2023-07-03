@@ -382,6 +382,7 @@ module overmind::broker_it_yourself {
     #[view]
     public fun get_creator_offers(creator: address): SimpleMap<u128, Offer> acquires State {
         // TODO: Call assert_state_initialized function
+        assert_state_initialized();
 
         // TODO: Filter the list of available offers and return only those that were created by the provided creator
     }
@@ -398,6 +399,17 @@ module overmind::broker_it_yourself {
         offer_id: &u128
     ) {
         // TODO: Find and remove the provided offer_id from the provided creator's offers list
+        let offers = simple_map::borrow(creators_offers, creator); 
+        let len = vector::length(offers);
+        let i = 0;
+        while (i < len) {
+            let entry = vector::borrow(offers, i);
+            if (entry == offer_id) {
+                vector::swap_remove(bucket, i);
+                break; 
+            };
+            i = i + 1;
+        };
     }
 
     /*
@@ -407,6 +419,8 @@ module overmind::broker_it_yourself {
     */
     public(friend) inline fun get_next_offer_id(offer_id: &mut u128): u128 {
         // TODO: Return a copy of offer_id and increment the original by one
+        let offer_id = borrow_global<State>(@admin).offer_id;
+        offer_id + 1
     }
 
     /////////////
