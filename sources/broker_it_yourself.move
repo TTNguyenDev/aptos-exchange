@@ -151,7 +151,7 @@ module overmind::broker_it_yourself {
         assert_state_initialized();
 
         // TODO: Call get_next_offer_id function
-        let offer_id = get_next_offer_id(&mut borrow_global_mut<State>(@admin).offer_id);
+        let offer_id = get_next_offer_id(&mut borrow_global_mut<State>(@admin).offer_id) - 1;
 
         // TODO: Create instance of Offer struct
         let offer = Offer {
@@ -182,13 +182,13 @@ module overmind::broker_it_yourself {
         simple_map::add(&mut borrow_global_mut<State>(@admin).offers, offer_id, offer);
 
         // TODO: Add the offer id to the creator's offers list
-        let creators_offers = borrow_global_mut<State>(@admin).creators_offers;
-        if (simple_map::contains_key(&creators_offers, &signer::address_of(creator))) {
-            vector::push_back(simple_map::borrow_mut(&mut creators_offers, &signer::address_of(creator)), offer_id);
+        let state = borrow_global_mut<State>(@admin);
+        if (simple_map::contains_key(&state.creators_offers, &signer::address_of(creator))) {
+            vector::push_back(simple_map::borrow_mut(&mut state.creators_offers, &signer::address_of(creator)), offer_id);
         } else {
             let vec = vector::empty<u128>();
             vector::push_back(&mut vec, offer_id);
-            simple_map::add(&mut creators_offers, signer::address_of(creator), vec);
+            simple_map::add(&mut state.creators_offers, signer::address_of(creator), vec);
         };
 
         // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true && assert_user_has_enough_funds
@@ -576,9 +576,8 @@ module overmind::broker_it_yourself {
     */
     public(friend) inline fun get_next_offer_id(offer_id: &mut u128): u128 {
         // TODO: Return a copy of offer_id and increment the original by one
-        let cur = *offer_id;
-        cur = cur + 1;
-        cur
+        *offer_id = *offer_id + 1;
+        *offer_id
     }
 
     /////////////
