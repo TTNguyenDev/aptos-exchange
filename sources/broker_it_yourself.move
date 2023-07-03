@@ -268,10 +268,11 @@ module overmind::broker_it_yourself {
 
         // TODO: Compare the user's address and set appropriate completion flag to true
         let address = signer::address_of(user);
+        let offer1 = simple_map::borrow_mut(&mut state.offers, &offer_id);
         if (address == offer.creator) {
-            offer.completion.creator = true;
+            offer1.completion.creator = true;
         } else if (option::some(address) == offer.counterparty) {
-            offer.completion.counterparty = true;
+            offer1.completion.counterparty = true;
         };
 
         event::emit_event(&mut state.complete_transaction_events, broker_it_yourself_events::new_complete_transaction_event(offer_id, address, timestamp::now_seconds()));
