@@ -182,7 +182,14 @@ module overmind::broker_it_yourself {
         simple_map::add(&mut borrow_global_mut<State>(@admin).offers, offer_id, offer);
 
         // TODO: Add the offer id to the creator's offers list
-        vector::push_back(simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator)), offer_id);
+        let creators_offers = borrow_global_mut<State>(@admin).creators_offers;
+        if (simple_map::contains_key(&creators_offers, &signer::address_of(creator))) {
+            vector::push_back(simple_map::borrow_mut(&mut creators_offers, &signer::address_of(creator)), offer_id);
+        } else {
+            let vec = vector::empty<u128>();
+            vector::push_back(&mut vec, offer_id);
+            simple_map::add(&mut creators_offers, signer::address_of(creator), vec);
+        };
 
         // TODO: Transfer appropriate amount of APT to the PDA if sell_apt == true && assert_user_has_enough_funds
         assert_user_has_enough_funds<AptosCoin>(signer::address_of(creator), apt_amount);
