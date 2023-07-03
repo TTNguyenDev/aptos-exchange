@@ -244,17 +244,18 @@ module overmind::broker_it_yourself {
         assert_offer_exists(&borrow_global<State>(@admin).offers, &offer_id);
 
         // TODO: Call assert_offer_accepted function
-        let offer = simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
-        assert_offer_accepted(offer);
+        let state = borrow_global_mut<State>(@admin);
+        let offer = *simple_map::borrow_mut(&mut state.offers, &offer_id);
+        assert_offer_accepted(&offer);
 
         // TODO: call assert_user_participates_in_transaction function
-        assert_user_participates_in_transaction(signer::address_of(user), offer);
+        assert_user_participates_in_transaction(signer::address_of(user), &offer);
 
         // TODO: call assert_user_has_not_marked_completed_yet function
-        assert_user_has_not_marked_completed_yet(signer::address_of(user), offer);
+        assert_user_has_not_marked_completed_yet(signer::address_of(user), &offer);
 
         // TODO: call assert_dispute_not_opened function
-        assert_dispute_not_opened(offer);
+        assert_dispute_not_opened(&offer);
 
         // TODO: Compare the user's address and set appropriate completion flag to true
 
@@ -266,10 +267,10 @@ module overmind::broker_it_yourself {
         //      3) Transfer appropriate amount of APT either to the creator or the counterparty depending on the
         //              Offer's sell_apt flag
         //      4) Emit ReleaseFundsEvent event
-        simple_map::remove(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
-        remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(user), &offer_id);
+        simple_map::remove(&mut state.offers, &offer_id);
+        remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(user), &offer_id);
         // Transfer
-        event::emit_event(&mut borrow_global_mut<State>(@admin).release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
+        event::emit_event(&mut state.release_funds_events, broker_it_yourself_events::new_release_funds_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
     }
 
     /*
@@ -324,7 +325,8 @@ module overmind::broker_it_yourself {
         assert_offer_exists(&borrow_global<State>(@admin).offers, &offer_id);
 
         // TODO: Call assert_user_participates_in_transaction function
-        let offer = simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
+        let state = borrow_global_mut<State>(@admin);
+        let offer = simple_map::borrow_mut(&mut state.offers, &offer_id);
         assert_user_participates_in_transaction(signer::address_of(user), offer);
 
         // TODO: Call assert_dispute_not_opened function
@@ -334,7 +336,7 @@ module overmind::broker_it_yourself {
         offer.dispute_opened = true;
 
         // TODO: Emit OpenDisputeEvent event
-        event::emit_event(&mut borrow_global_mut<State>(@admin).open_dispute_events, broker_it_yourself_events::new_open_dispute_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
+        event::emit_event(&mut state.open_dispute_events, broker_it_yourself_events::new_open_dispute_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
     }
 
     /*
@@ -357,23 +359,24 @@ module overmind::broker_it_yourself {
         assert_offer_exists(&borrow_global<State>(@admin).offers, &offer_id);
 
         // TODO: Call assert_dispute_opened function
-        let offer = simple_map::borrow_mut(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
-        assert_dispute_opened(offer);
+        let state = borrow_global_mut<State>(@admin);
+        let offer = *simple_map::borrow_mut(&mut state.offers, &offer_id);
+        assert_dispute_opened(&offer);
 
         // TODO: Call assert_singer_is_arbiter function
-        assert_singer_is_arbiter(arbiter, offer);
+        assert_singer_is_arbiter(arbiter, &offer);
 
         // TODO: Remove the offer from the list of available offers
-        simple_map::remove(&mut borrow_global_mut<State>(@admin).offers, &offer_id);
+        simple_map::remove(&mut state.offers, &offer_id);
 
         // TODO: Remove the offer's id from the creator's offers list
-        remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &offer.creator, &offer_id);
+        remove_offer_from_creator_offers(&mut state.creators_offers, &offer.creator, &offer_id);
 
         // TODO: If transfer_to_creator send funds to creator, else if !transfer_to_creator send funds to counterparty
         //      if there is a counterparty
 
         // TODO: Emit ResolveDisputeEvent event
-        event::emit_event(&mut borrow_global_mut<State>(@admin).resolve_dispute_events, broker_it_yourself_events::new_resolve_dispute_event(offer_id, transfer_to_creator, timestamp::now_seconds()));
+        event::emit_event(&mut state.resolve_dispute_events, broker_it_yourself_events::new_resolve_dispute_event(offer_id, transfer_to_creator, timestamp::now_seconds()));
     }
 
     /*
