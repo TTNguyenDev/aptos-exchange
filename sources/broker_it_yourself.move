@@ -278,7 +278,7 @@ module overmind::broker_it_yourself {
         event::emit_event(&mut state.complete_transaction_events, broker_it_yourself_events::new_complete_transaction_event(offer_id, address, timestamp::now_seconds()));
 
 
-        if (offer.completion.creator == true && offer.completion.counterparty == true) {
+        if (offer1.completion.creator == true && offer1.completion.counterparty == true) {
             simple_map::remove(&mut state.offers, &offer_id);
             remove_offer_from_creator_offers(&mut state.creators_offers, &signer::address_of(user), &offer_id);
             // Transfer
@@ -368,7 +368,7 @@ module overmind::broker_it_yourself {
         offer.dispute_opened = true;
 
         // TODO: Emit OpenDisputeEvent event
-        event::emit_event(&mut state.open_dispute_events, broker_it_yourself_events::new_open_dispute_event(offer_id, option::extract(&mut offer.counterparty), timestamp::now_seconds()));
+        event::emit_event(&mut state.open_dispute_events, broker_it_yourself_events::new_open_dispute_event(offer_id, *option::borrow(&offer.counterparty), timestamp::now_seconds()));
     }
 
     /*
