@@ -301,6 +301,11 @@ module overmind::broker_it_yourself {
         remove_offer_from_creator_offers(&mut borrow_global_mut<State>(@admin).creators_offers, &signer::address_of(creator), &offer_id);
 
         // TODO: Transfer appropriate amount of APT from the PDA to the creator if the Offer's sell_apt == true
+        assert_user_has_enough_funds();
+        if (sell_apt == false) {
+          let resource_signer = account::create_signer_with_capability(&mut borrow_global_mut<State>(@admin).cap);
+            coin::transfer<AptosCoin>(resource_signer, signer::address_of(&creator) , offer.apt_amount);
+        };
 
         // TODO: Emit CancelOfferEvent event
         event::emit_event(&mut borrow_global_mut<State>(@admin).cancel_offer_events, broker_it_yourself_events::new_cancel_offer_event(offer_id, timestamp::now_seconds()));
